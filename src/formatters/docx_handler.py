@@ -40,7 +40,7 @@ STYLE_CONFIG = {
         'space_before': 0,
         'space_after': 0,
         'line_spacing': 32,
-        'set_west': True,
+        'set_west': False,
     },
     '一级标题': {
         'font': '黑体',
@@ -51,7 +51,7 @@ STYLE_CONFIG = {
         'space_before': 0,
         'space_after': 0,
         'line_spacing': 28,
-        'set_west': True,
+        'set_west': False,
     },
     '二级标题': {
         'font': '楷体_GB2312',
@@ -62,7 +62,7 @@ STYLE_CONFIG = {
         'space_before': 0,
         'space_after': 0,
         'line_spacing': 28,
-        'set_west': True,
+        'set_west': False,
     },
     '主送机关': {
         'font': BODY_FONT,
@@ -73,7 +73,7 @@ STYLE_CONFIG = {
         'space_before': 0,
         'space_after': 0,
         'line_spacing': 28,
-        'set_west': True,
+        'set_west': False,
     },
     '公文正文': {
         'font': BODY_FONT,
@@ -84,7 +84,7 @@ STYLE_CONFIG = {
         'space_before': 0,
         'space_after': 0,
         'line_spacing': 28,
-        'set_west': True,
+        'set_west': False,
     },
     '公文落款': {
         'font': BODY_FONT,
@@ -107,7 +107,7 @@ STYLE_CONFIG = {
         'space_before': 0,
         'space_after': 0,
         'line_spacing': 28,
-        'set_west': True,
+        'set_west': False,
     },
 }
 
@@ -212,8 +212,8 @@ def safe_set_font(rPr, font_name: str, set_west: bool = True) -> None:
         rPr.insert(0, rFonts)
     rFonts.set(qn('w:eastAsia'), font_name)
     if set_west:
-        rFonts.set(qn('w:ascii'), 'Times New Roman')
-        rFonts.set(qn('w:hAnsi'), 'Times New Roman')
+        rFonts.set(qn('w:ascii'), font_name)
+        rFonts.set(qn('w:hAnsi'), font_name)
     else:
         rFonts.set(qn('w:ascii'), font_name)
         rFonts.set(qn('w:hAnsi'), font_name)
@@ -422,10 +422,10 @@ def add_page_number(paragraph: Paragraph, fmt: str = PAGE_FORMAT) -> None:
     else:
         left, right = '— ', ' —'
     run_left = paragraph.add_run(left)
-    run_left.font.name = 'Times New Roman'
+    run_left.font.name = '宋体'
     run_left.font.size = Pt(FOOTER_FONT_SIZE)
     run_field = paragraph.add_run()
-    run_field.font.name = 'Times New Roman'
+    run_field.font.name = '宋体'
     run_field.font.size = Pt(FOOTER_FONT_SIZE)
     fldChar_begin = OxmlElement('w:fldChar')
     fldChar_begin.set(qn('w:fldCharType'), 'begin')
@@ -437,7 +437,7 @@ def add_page_number(paragraph: Paragraph, fmt: str = PAGE_FORMAT) -> None:
     fldChar_end.set(qn('w:fldCharType'), 'end')
     run_field._element.append(fldChar_end)
     run_right = paragraph.add_run(right)
-    run_right.font.name = 'Times New Roman'
+    run_right.font.name = '宋体'
     run_right.font.size = Pt(FOOTER_FONT_SIZE)
 
 
