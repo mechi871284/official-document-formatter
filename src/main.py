@@ -17,6 +17,12 @@ import sys
 import os
 import logging
 
+# 确保formatters模块可被找到
+current_dir = os.path.dirname(os.path.abspath(__file__))
+if current_dir not in sys.path:
+    sys.path.insert(0, current_dir)
+
+# 使用相对导入避免PyInstaller打包问题
 from formatters.router import get_router
 
 # ------------------------------ 日志配置 ---------------------------------------
@@ -52,7 +58,7 @@ def main():
         
         file_dir = os.path.dirname(input_file)
         name, ext = os.path.splitext(os.path.basename(input_file))
-        backup_file = os.path.join(file_dir, f"{name}-旧{ext}")
+        backup_file = os.path.join(file_dir, f"{name}-未修改{ext}")
         output_file = input_file
         
         try:

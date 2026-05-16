@@ -125,21 +125,33 @@ LINE_SPACING_OTHER = 28
 FOOTER_FONT_SIZE = 14
 
 # ------------------------------ 正则表达式预编译 -------------------------------
-RE_H1 = re.compile(r'^[一二三四五六七八九十]+、')
-RE_H2 = re.compile(r'^（[一二三四五六七八九十]+）')
-RE_ATTACH = re.compile(r'^附件\d*\s*[：:]')
+# 一级标题：支持"一、" "1、" "1."等多种序号格式
+RE_H1 = re.compile(r'^(?:[一二三四五六七八九十]+[、.])|(?:\d{1,2}[、.])')
+# 二级标题：支持"（一）" "(一)" "1)"等多种格式
+RE_H2 = re.compile(r'^(?:（[一二三四五六七八九十]+）)|(?:\([一二三四五六七八九十]+\))|(?:\d{1,2}\))')
+# 附件：支持"附件" "附件1" "附件：" "附件1："及全角冒号
+RE_ATTACH = re.compile(r'^附件\d*\s*[：:]?')
+# 主送机关：更宽松的匹配模式，支持冒号结尾或特定模式
 RE_MAIN_RECEIVER = re.compile(
-    r'^(?!.*(?:注明|备注|说明|解释|参考|来源|联系|电话|传真|电子邮箱|附件|抄送|主题词|印发日期))[^。；，！？…]+[：:]\s*$'
+    r'^(?:各|各有关|本|本司|本局|各部|各省|自治区|直辖市).*[：:]\s*$'
+    r'|^(?!.*(?:注明|备注|说明|解释|参考|来源|联系|电话|传真|电子邮箱|附件|抄送|主题词|印发日期))[^。；，！？…]{3,30}[：:]\s*$'
 )
+# 日期模式：增强支持各种日期格式变体
 RE_DATE_PATTERN = re.compile(
     r'(\d{4}\s*年\s*\d{1,2}\s*月\s*\d{1,2}\s*日)'
     r'|((?:二[零〇一二三四五六七八九十]+)\s*年\s*.*?\s*月\s*.*?\s*日)'
+    r'|(\d{4}[-/]\d{1,2}[-/]\d{1,2})'
 )
+# 附件前缀：匹配到冒号为止（包括空格）
 RE_ATTACH_PREFIX = re.compile(r'^(附件\d*\s*[：:])')
-RE_ATTACH_INDENT = re.compile(r'^\d+[.、]')
+# 附件缩进识别：增强支持"1." "1、" "1)"等
+RE_ATTACH_INDENT = re.compile(r'^\s*\d+[.、)）]')
+# 落款排除
 RE_SIGNATURE_EXCLUDE = re.compile(r'附件|抄送|主题词|（此页无正文）|\d{4}年')
+# H2分隔符
 RE_H2_SPLIT = re.compile(r'[。；]')
-RE_CLEAN_SPACES = re.compile(r'[\s\u3000]')
+# 空白清理（包括全角空格、不间断空格）
+RE_CLEAN_SPACES = re.compile(r'[\s\u3000\u00A0\u2000-\u200B]+')
 
 
 @lru_cache(maxsize=512)
@@ -266,6 +278,14 @@ def strip_leading_spaces(paragraph: Paragraph) -> None:
     set_run_font(new_run, BODY_FONT, BODY_SIZE)
 
 
+def _clear_paragraph_runs(paragraph: Paragraph) -> None:
+    """清除段落中所有运行的直接字体格式，确保样式生效。"""
+    for run in paragraph.runs:
+        rPr = run._element.find(qn('w:rPr'))
+        if rPr is not None:
+            run._element.remove(rPr)
+
+
 def insert_empty_paragraph_before(target_paragraph: Paragraph, doc: DocumentType, body_style) -> None:
     """在目标段落前插入空段落。"""
     empty_p = OxmlElement('w:p')
@@ -293,7 +313,15 @@ def find_title_index(paragraphs: List[Paragraph]) -> Optional[int]:
 
 
 def adjust_attachment_block(paragraphs: List[Paragraph], re_attach, re_h1, re_h2) -> None:
-    """调整附件块的格式和缩进。"""
+    """调整附件块的格式和缩进。
+    
+    公文附件格式规范：
+    - 单个附件：附件：关于XXX的通知（首行缩进2字符）
+    - 多个附件：附件：（首行缩进2字符）
+              1.关于XXX的通知（前端对齐）
+              2.关于YYY的说明（前端对齐）
+    """
+    attach_blocks = []
     i = 0
     while i < len(paragraphs):
         p = paragraphs[i]
@@ -306,34 +334,49 @@ def adjust_attachment_block(paragraphs: List[Paragraph], re_attach, re_h1, re_h2
                 if re_h1.match(next_text) or re_h2.match(next_text) or re_attach.match(next_text):
                     break
                 block_end += 1
-            _align_attachment_with_indent(paragraphs, block_start, block_end)
+            attach_blocks.append((block_start, block_end))
             i = block_end
         else:
             i += 1
+    
+    for start, end in attach_blocks:
+        _format_attachment_block(paragraphs, start, end)
 
 
-def _align_attachment_with_indent(paragraphs: List[Paragraph], start: int, end: int) -> None:
-    """对齐附件块内段落的缩进。"""
+def _format_attachment_block(paragraphs: List[Paragraph], start: int, end: int) -> None:
+    """格式化单个附件块。
+    
+    Args:
+        paragraphs: 段落列表
+        start: 附件块起始索引
+        end: 附件块结束索引
+    """
     first_p = paragraphs[start]
     strip_leading_spaces(first_p)
     first_text = first_p.text
-    prefix_match = RE_ATTACH_PREFIX.match(first_text)
-    if not prefix_match:
+    
+    # 检查是否为多附件格式（后续段落以数字序号开头）
+    is_multi = False
+    if end - start > 1:
+        for i in range(start + 1, end):
+            if RE_ATTACH_INDENT.search(paragraphs[i].text.strip()):
+                is_multi = True
+                break
+    
+    if is_multi:
+        # 多附件格式：引导行缩进2字符，序号行缩进与引导行前缀后内容对齐
+        first_p.paragraph_format.first_line_indent = pt_from_chars(BODY_SIZE, 2)
+        prefix_match = RE_ATTACH_PREFIX.match(first_text)
+        prefix_len = len(prefix_match.group(1)) if prefix_match else 0
+        indent_chars = 2 + prefix_len
+        for i in range(start + 1, end):
+            p = paragraphs[i]
+            strip_leading_spaces(p)
+            p.paragraph_format.first_line_indent = pt_from_chars(BODY_SIZE, indent_chars)
+    else:
+        # 单附件格式：首行缩进2字符
         for i in range(start, end):
             paragraphs[i].paragraph_format.first_line_indent = pt_from_chars(BODY_SIZE, 2)
-        return
-    prefix = prefix_match.group(1)
-    prefix_len = len(prefix)
-    first_p.paragraph_format.first_line_indent = pt_from_chars(BODY_SIZE, 2)
-    for i in range(start + 1, end):
-        p = paragraphs[i]
-        strip_leading_spaces(p)
-        text = p.text
-        if RE_ATTACH_INDENT.search(text):
-            indent_chars = 2 + prefix_len
-            p.paragraph_format.first_line_indent = pt_from_chars(BODY_SIZE, indent_chars)
-        else:
-            p.paragraph_format.first_line_indent = pt_from_chars(BODY_SIZE, 2)
 
 
 def apply_signature_style(paragraphs: List[Paragraph], signature_style, body_style, doc: DocumentType) -> None:
@@ -531,6 +574,8 @@ def format_docx_content(doc: DocumentType) -> None:
     for i, p in enumerate(paragraphs):
         text = p.text.strip()
         if not text:
+            p.style = body_style
+            _clear_paragraph_runs(p)
             continue
         if i == title_idx or i == main_receiver_idx:
             continue

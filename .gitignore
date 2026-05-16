@@ -31,3 +31,23 @@ Thumbs.db
 
 # 日志
 *.log
+
+# PyInstaller打包
+dist/
+*.exe
+# *.spec - 保留配置文件不忽略
+
+# 备份文件
+*-未修改.*
+*-旧.*
+
+# 测试文本
+测试文本/
+测试文档/
+测试文件/
+
+# Hooks临时文件
+src/hooks/
+
+# config下的打包输出
+config/dist/
