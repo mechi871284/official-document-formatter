@@ -3,10 +3,10 @@
 
 a = Analysis(
     ['../src/main.py'],
-    pathex=[],
+    pathex=['../src'],
     binaries=[],
     datas=[],
-    hiddenimports=[],
+    hiddenimports=['formatters', 'formatters.base_handler', 'formatters.docx_handler', 'formatters.doc_handler', 'formatters.wps_handler', 'formatters.router'],
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],

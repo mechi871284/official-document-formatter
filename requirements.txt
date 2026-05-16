@@ -1,13 +1,3 @@
-# 公文格式化工具 - 依赖列表
-
-# 文档处理
 python-docx>=0.8.11
-
-# 图像处理（用于图标转换）
+pywin32>=306; sys_platform == 'win32'
 Pillow>=10.0.0
-
-# 打包工具
-pyinstaller>=6.0.0
-
-# 测试框架
-pytest>=7.0.0
