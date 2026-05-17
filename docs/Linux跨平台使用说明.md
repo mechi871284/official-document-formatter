@@ -14,7 +14,25 @@
 
 ## 快速开始
 
-### 方式一：使用启动脚本（推荐）
+### 方式一：使用预编译可执行文件（推荐）
+
+从 GitHub Releases 下载预编译的 Linux 可执行文件：
+
+```bash
+# 1. 下载最新版本
+wget https://github.com/mechi871284/official-document-formatter/releases/latest/download/公文格式化工具
+
+# 2. 添加执行权限
+chmod +x 公文格式化工具
+
+# 3. 运行程序
+./公文格式化工具
+
+# 4. 或者处理文档
+./公文格式化工具 文档.docx
+```
+
+### 方式二：使用启动脚本
 
 ```bash
 # 1. 进入项目目录
@@ -29,6 +47,22 @@ chmod +x run.sh
 # 4. 或者直接处理文档
 ./run.sh 文档.docx
 ./run.sh 文档1.docx 文档2.docx
+```
+
+### 方式三：自己编译打包
+
+```bash
+# 1. 进入项目目录
+cd 公文格式化工具
+
+# 2. 安装 PyInstaller
+pip3 install pyinstaller
+
+# 3. 打包 Linux 可执行文件
+pyinstaller config/linux.spec
+
+# 4. 添加执行权限
+chmod +x 公文格式化工具
 ```
 
 ### 方式二：直接调用 Python
@@ -91,6 +125,8 @@ pip3 install python-docx
 │       ├── wps_handler.py      # WPS处理器（Windows-only）
 │       └── router.py           # 格式路由
 ├── config/
+│   ├── 公文格式化工具.spec     # Windows PyInstaller 配置
+│   └── linux.spec              # Linux PyInstaller 配置
 ├── assets/
 ├── tests/
 ├── docs/

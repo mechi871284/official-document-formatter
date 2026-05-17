@@ -169,7 +169,8 @@ is_valid, message, handler = router.validate_file('文档.docx')
 │       ├── 公文格式化工具图标设计.ico
 │       └── 公文格式化工具图标设计.png
 ├── config/                       # 配置文件
-│   └── 公文格式化工具.spec       # PyInstaller打包配置
+│   ├── 公文格式化工具.spec       # PyInstaller Windows打包配置
+│   └── linux.spec                # PyInstaller Linux打包配置
 ├── docs/                         # 文档目录
 │   ├── Linux跨平台使用说明.md
 │   └── 目录结构说明.md
@@ -295,6 +296,12 @@ python scripts/convert_icon.py
 
 ## 版本历史
 
+- **v5.2.0**：完善多平台打包支持
+  - 新增 Linux 打包配置文件 linux.spec
+  - 修复测试模块导入路径问题
+  - 更新 README.md 添加 Linux 打包说明
+  - 修复 Windows exe 打包图标路径问题
+  - 47 个测试全部通过
 - **v5.1.0**：优化doc和wps原生支持，修正字体设置
   - 优先使用WPS Office，备选Microsoft Word
   - 添加Word/WPS实例复用机制
