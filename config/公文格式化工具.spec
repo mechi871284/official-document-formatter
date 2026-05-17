@@ -26,6 +26,7 @@ a = Analysis(
         'formatters.wps_handler',
         'formatters.router',
         'formatters.robustness',
+        'formatters.cross_platform',
     ] + collect_submodules('win32com'),
     hookspath=[],
     hooksconfig={},
