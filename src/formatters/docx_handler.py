@@ -373,10 +373,14 @@ def _format_attachment_block(paragraphs: List[Paragraph], start: int, end: int) 
             p = paragraphs[i]
             strip_leading_spaces(p)
             p.paragraph_format.first_line_indent = pt_from_chars(BODY_SIZE, indent_chars)
+            for run in p.runs:
+                set_run_font(run, BODY_FONT, BODY_SIZE, bold=False)
     else:
         # 单附件格式：首行缩进2字符
         for i in range(start, end):
             paragraphs[i].paragraph_format.first_line_indent = pt_from_chars(BODY_SIZE, 2)
+            for run in paragraphs[i].runs:
+                set_run_font(run, BODY_FONT, BODY_SIZE, bold=False)
 
 
 def apply_signature_style(paragraphs: List[Paragraph], signature_style, body_style, doc: DocumentType) -> None:
