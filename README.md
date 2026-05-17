@@ -294,24 +294,6 @@ pytest tests/test_formatters.py -v
 python scripts/convert_icon.py
 ```
 
-## 版本历史
-
-- **v5.2.0**：完善多平台打包支持
-  - 新增 Linux 打包配置文件 linux.spec
-  - 修复测试模块导入路径问题
-  - 更新 README.md 添加 Linux 打包说明
-  - 修复 Windows exe 打包图标路径问题
-  - 47 个测试全部通过
-- **v5.1.0**：优化doc和wps原生支持，修正字体设置
-  - 优先使用WPS Office，备选Microsoft Word
-  - 添加Word/WPS实例复用机制
-  - 所有字符类型（中文、英文、数字）统一使用指定字体
-  - 移除Times New Roman字体
-  - 使用命名常量替代硬编码格式数字
-- **v5.0.0**：新增.doc和.wps格式支持，统一API接口
-- **v4.0.0**：全面代码质量优化，类型注解，错误处理增强
-- **v3.7.3**：落款偏移量校正，首行缩进优化
-
 ## 许可证
 
 本项目仅供内部使用。
