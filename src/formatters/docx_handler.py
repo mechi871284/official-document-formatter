@@ -325,9 +325,8 @@ def adjust_attachment_block(paragraphs: List[Paragraph], re_attach, re_h1, re_h2
     
     公文附件格式规范：
     - 单个附件：附件：关于XXX的通知（首行缩进2字符）
-    - 多个附件：附件：（首行缩进2字符）
-              1.关于XXX的通知（前端对齐）
-              2.关于YYY的说明（前端对齐）
+    - 多个附件：附件：1.关于XXX的通知（左对齐）
+                2.关于YYY的说明（左缩进与"1."对齐）
     """
     attach_blocks = []
     i = 0
@@ -372,15 +371,16 @@ def _format_attachment_block(paragraphs: List[Paragraph], start: int, end: int) 
                 break
     
     if is_multi:
-        # 多附件格式：引导行缩进2字符，序号行缩进与引导行前缀后内容对齐
-        first_p.paragraph_format.first_line_indent = pt_from_chars(BODY_SIZE, 2)
+        # 多附件格式：引导行左对齐，序号行缩进与引导行中"1."后的内容对齐
+        first_p.paragraph_format.first_line_indent = 0  # 引导行左对齐
         prefix_match = RE_ATTACH_PREFIX.match(first_text)
         prefix_len = len(prefix_match.group(1)) if prefix_match else 0
-        indent_chars = 2 + prefix_len
+        # 序号行缩进：引导行前缀长度（"附件："）+ 2（用于"1."）+ 1（用于序号后空格）
+        indent_chars = prefix_len + 3
         for i in range(start + 1, end):
             p = paragraphs[i]
             strip_leading_spaces(p)
-            p.paragraph_format.first_line_indent = pt_from_chars(BODY_SIZE, indent_chars)
+            p.paragraph_format.left_indent = pt_from_chars(BODY_SIZE, indent_chars)
             for run in p.runs:
                 set_run_font(run, BODY_FONT, BODY_SIZE, bold=False)
     else:
