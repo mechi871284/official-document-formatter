@@ -29,13 +29,13 @@
 ## 安装步骤
 
 ### 环境要求
-- **操作系统**：Windows 7 及以上版本
+- **操作系统**：Windows 7 及以上版本 / Linux / macOS
 - **Python版本**：Python 3.8 或更高版本
 - **办公软件**：
   - Microsoft Word（处理.doc格式必需）
   - WPS Office（处理.wps格式可选）
 
-### 安装依赖
+### Windows 安装
 
 1. 克隆或下载项目到本地目录
 2. 打开命令行，进入项目根目录
@@ -43,6 +43,45 @@
 
 ```bash
 pip install -r requirements.txt
+```
+
+### Linux 安装
+
+#### 方式一：一键安装（推荐）
+
+```bash
+# 用户级安装（无需 root）
+./scripts/install_linux.sh
+
+# 系统级安装（需要 root）
+sudo ./scripts/install_linux.sh --system
+```
+
+#### 方式二：手动安装
+
+```bash
+# 1. 安装依赖
+pip3 install python-docx
+
+# 2. 生成 .desktop 文件
+./scripts/generate_desktop_file.sh
+
+# 3. 或手动指定参数
+./scripts/generate_desktop_file.sh \
+  --name "公文格式化工具" \
+  --exec "/opt/公文格式化工具/run.sh %f" \
+  --icon "/opt/公文格式化工具/assets/icons/图标.png" \
+  --system
+```
+
+#### 卸载
+
+```bash
+# 用户级卸载
+./scripts/uninstall_linux.sh
+
+# 系统级卸载
+sudo ./scripts/uninstall_linux.sh --system
 ```
 
 依赖包说明：
@@ -70,7 +109,15 @@ python src/main.py 文档1.docx 文档2.doc 文档3.wps
 
 ### 拖拽方式
 
+#### Windows
 直接将文档文件拖拽到`公文格式化工具.exe`图标上，程序将自动处理。
+
+#### Linux
+安装 .desktop 文件后，支持以下拖放方式：
+1. **应用图标拖放**：将文件拖拽到应用程序菜单中的图标上
+2. **桌面快捷方式**：将文件拖拽到桌面上的快捷方式图标
+3. **右键菜单**：右键点击文档 -> 打开方式 -> 公文格式化工具
+4. **文件管理器**：在 Nautilus/Dolphin/Thunar 中直接拖放
 
 ### Python API方式
 
@@ -127,7 +174,10 @@ is_valid, message, handler = router.validate_file('文档.docx')
 │   ├── Linux跨平台使用说明.md
 │   └── 目录结构说明.md
 ├── scripts/                      # 工具脚本
-│   └── convert_icon.py           # 图标转换脚本
+│   ├── convert_icon.py           # 图标转换脚本
+│   ├── generate_desktop_file.sh  # Linux .desktop 文件生成器
+│   ├── install_linux.sh          # Linux 一键安装脚本
+│   └── uninstall_linux.sh        # Linux 卸载脚本
 ├── src/                          # 源代码目录
 │   ├── __init__.py
 │   ├── main.py                   # 主程序入口（Windows）
