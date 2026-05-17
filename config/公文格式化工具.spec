@@ -57,6 +57,6 @@ exe = EXE(
     codesign_identity=None,
     entitlements_file=None,
     # icon=os.path.join(spec_dir, '..', 'assets', 'icons', '公文格式化工具图标设计.ico'),
-    icon=None,
+    icon=os.path.join(spec_dir, '..', 'assets', 'icons', '公文格式化工具图标设计.ico'),
     distpath=os.path.join(spec_dir, '..'),
 )
