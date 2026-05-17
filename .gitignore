@@ -40,14 +40,20 @@ dist/
 # 备份文件
 *-未修改.*
 *-旧.*
+*.backup
 
-# 测试文本
+# 测试数据
+test_data/
 测试文本/
 测试文档/
 测试文件/
 
 # Hooks临时文件
 src/hooks/
+
+# 临时报告
+CLEANUP_*.md
+ORGANIZATION_*.md
 
 # config下的打包输出
 config/dist/
