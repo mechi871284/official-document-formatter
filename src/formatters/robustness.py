@@ -5,7 +5,7 @@
 
 import os
 import re
-from typing import Optional, Any, Callable, TypeVar
+from typing import Optional, Any, Callable, TypeVar, Tuple
 from functools import wraps
 from pathlib import Path
 

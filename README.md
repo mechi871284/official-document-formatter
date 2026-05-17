@@ -206,7 +206,7 @@ is_valid, message, handler = router.validate_file('文档.docx')
 
 ## 打包部署
 
-### 打包为exe
+### 打包 Windows exe
 
 ```bash
 # 进入项目目录
@@ -216,12 +216,28 @@ cd 项目根目录
 pyinstaller config/公文格式化工具.spec
 ```
 
-打包完成后，可执行文件将生成在项目根目录。
+打包完成后，可执行文件 `公文格式化工具.exe` 将生成在项目根目录。
+
+### 打包 Linux ELF
+
+在 Linux 系统上执行以下命令：
+
+```bash
+# 进入项目目录
+cd 公文格式化工具
+
+# 执行打包
+pyinstaller config/linux.spec
+
+# 添加可执行权限
+chmod +x 公文格式化工具
+```
 
 ### 分发说明
 
 分发时只需提供以下文件：
-- `公文格式化工具.exe`（主程序）
+- `公文格式化工具.exe`（Windows主程序）
+- `公文格式化工具`（Linux可执行文件）
 - `requirements.txt`（依赖说明）
 - `README.md`（使用说明）
 

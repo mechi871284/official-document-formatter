@@ -19,6 +19,8 @@ current_dir = os.path.dirname(os.path.abspath(__file__))
 if current_dir not in sys.path:
     sys.path.insert(0, current_dir)
 
+from formatters.router import get_router
+
 
 def detect_system() -> dict:
     """检测当前系统环境信息。
@@ -79,28 +81,8 @@ def main():
     system_info = detect_system()
     print_welcome(system_info)
     
-    # 延迟导入formatters，避免非Windows系统的导入问题
+    # 获取路由器
     try:
-        from formatters.router import get_router
-    except ImportError as e:
-        print(f"❌ 模块导入错误: {e}")
-        print()
-        if not system_info['is_windows']:
-            print("💡 可能是某些Windows-only依赖导致的问题")
-            print("   在非Windows系统上，我们将尝试使用最小功能集...")
-            print()
-            
-            # 尝试仅导入docx处理器
-            try:
-                sys.modules['win32com'] = None
-                sys.modules['win32com.client'] = None
-                from formatters.router import get_router
-            except:
-                pass
-    
-    # 获取路由器并继续
-    try:
-        from formatters.router import get_router
         router = get_router()
     except Exception as e:
         logger.exception("无法初始化格式处理器")

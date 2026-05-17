@@ -23,10 +23,7 @@ import shutil
 from pathlib import Path
 
 # 确保模块可被找到
-current_dir = os.path.dirname(os.path.abspath(__file__))
-parent_dir = os.path.dirname(current_dir)
-if parent_dir not in sys.path:
-    sys.path.insert(0, parent_dir)
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
 
 from formatters.robustness import (
     validate_file_path,
@@ -141,7 +138,7 @@ class TestUtilityFunctions(unittest.TestCase):
     def test_pt_from_chars(self):
         """测试字符数转磅值。"""
         result = pt_from_chars(16, 2)
-        self.assertEqual(result, 32)
+        self.assertEqual(result.pt, 32.0)
     
     def test_strip_leading_spaces_basic(self):
         """测试前导空格移除。"""

@@ -29,6 +29,12 @@ BODY_SIZE = 16
 PAGE_FORMAT = '— PAGE —'
 SIGNATURE_OFFSET = 0.0  # 单位左移校正值（正数左移，负数右移），单位：全角字符
 
+# ------------------------------ 落款对齐常量 -----------------------------------
+# 落款右缩进基准值（单位：全角字符）
+SIGNATURE_BASE_INDENT = 4.0
+# 单位与日期对齐的微调值（单位：全角字符）
+SIGNATURE_ALIGN_ADJUST = 0.7
+
 # ------------------------------ 样式配置常量 -----------------------------------
 STYLE_CONFIG = {
     '公文标题': {
@@ -217,18 +223,20 @@ def pt_from_chars(font_size_pt: float, chars: float = 2.0) -> Pt:
 
 
 def safe_set_font(rPr, font_name: str, set_west: bool = True) -> None:
-    """安全设置字体，确保XML元素存在。"""
+    """安全设置字体，确保XML元素存在。
+    
+    Args:
+        rPr: Run properties XML元素
+        font_name: 字体名称
+        set_west: 是否同时设置西文字体（ascii, hAnsi）
+    """
     rFonts = rPr.find(qn('w:rFonts'))
     if rFonts is None:
         rFonts = OxmlElement('w:rFonts')
         rPr.insert(0, rFonts)
     rFonts.set(qn('w:eastAsia'), font_name)
-    if set_west:
-        rFonts.set(qn('w:ascii'), font_name)
-        rFonts.set(qn('w:hAnsi'), font_name)
-    else:
-        rFonts.set(qn('w:ascii'), font_name)
-        rFonts.set(qn('w:hAnsi'), font_name)
+    rFonts.set(qn('w:ascii'), font_name)
+    rFonts.set(qn('w:hAnsi'), font_name)
 
 
 def set_run_font(run, font_name: str, font_size: float, bold: bool = False, set_west: bool = True) -> None:
@@ -423,15 +431,14 @@ def apply_signature_style(paragraphs: List[Paragraph], signature_style, body_sty
     clean_unit = RE_CLEAN_SPACES.sub('', unit_text)
     date_w = sum(char_width(ch) for ch in clean_date)
     unit_w = sum(char_width(ch) for ch in clean_unit)
-    base_indent = 4.0
-    unit_indent = base_indent - (unit_w - date_w) / 2.0 + SIGNATURE_OFFSET + 0.7
+    unit_indent = SIGNATURE_BASE_INDENT - (unit_w - date_w) / 2.0 + SIGNATURE_OFFSET + SIGNATURE_ALIGN_ADJUST
     logger.debug(f"落款：单位={unit_text!r}(宽{unit_w}) 日期={date_text!r}(宽{date_w}) → 单位右缩进={unit_indent:.2f}字符")
     p_unit.style = signature_style
     p_unit.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.RIGHT
     p_unit.paragraph_format.right_indent = pt_from_chars(BODY_SIZE, unit_indent)
     p_date.style = signature_style
     p_date.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.RIGHT
-    p_date.paragraph_format.right_indent = pt_from_chars(BODY_SIZE, base_indent)
+    p_date.paragraph_format.right_indent = pt_from_chars(BODY_SIZE, SIGNATURE_BASE_INDENT)
     if unit_idx > 0 and paragraphs[unit_idx - 1].text.strip():
         insert_empty_paragraph_before(p_unit, doc, body_style)
 
@@ -469,10 +476,10 @@ def add_page_number(paragraph: Paragraph, fmt: str = PAGE_FORMAT) -> None:
     else:
         left, right = '— ', ' —'
     run_left = paragraph.add_run(left)
-    run_left.font.name = '宋体'
+    run_left.font.name = BODY_FONT
     run_left.font.size = Pt(FOOTER_FONT_SIZE)
     run_field = paragraph.add_run()
-    run_field.font.name = '宋体'
+    run_field.font.name = BODY_FONT
     run_field.font.size = Pt(FOOTER_FONT_SIZE)
     fldChar_begin = OxmlElement('w:fldChar')
     fldChar_begin.set(qn('w:fldCharType'), 'begin')
@@ -484,7 +491,7 @@ def add_page_number(paragraph: Paragraph, fmt: str = PAGE_FORMAT) -> None:
     fldChar_end.set(qn('w:fldCharType'), 'end')
     run_field._element.append(fldChar_end)
     run_right = paragraph.add_run(right)
-    run_right.font.name = '宋体'
+    run_right.font.name = BODY_FONT
     run_right.font.size = Pt(FOOTER_FONT_SIZE)
 
 

@@ -11,7 +11,7 @@ from unittest.mock import patch, MagicMock
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
 
-from main import (
+from formatters.docx_handler import (
     is_fullwidth,
     char_width,
     pt_from_chars,
@@ -23,7 +23,6 @@ from main import (
     RE_MAIN_RECEIVER,
     RE_DATE_PATTERN,
     RE_SIGNATURE_EXCLUDE,
-    format_official_document,
 )
 
 
@@ -160,15 +159,12 @@ class TestGetUniqueBackupPath:
             assert '(1)' in result
 
 
-class TestFormatOfficialDocument:
-    """测试主格式化函数"""
+class TestBackupPath:
+    """测试备份功能"""
 
-    def test_file_not_exists(self):
-        with pytest.raises(FileNotFoundError):
-            format_official_document("nonexistent.docx", "output.docx")
-
-    def test_backup_and_format(self):
+    def test_format_and_backup(self):
         from docx import Document
+        from formatters.docx_handler import DocxFormatHandler
 
         with tempfile.TemporaryDirectory() as tmpdir:
             input_path = os.path.join(tmpdir, "test.docx")
@@ -179,7 +175,8 @@ class TestFormatOfficialDocument:
             doc.add_paragraph("测试内容")
             doc.save(input_path)
 
-            actual_backup = format_official_document(input_path, output_path, backup_path)
+            handler = DocxFormatHandler()
+            actual_backup = handler.format_document(input_path, output_path, backup_path)
 
             assert os.path.exists(output_path)
             assert os.path.exists(actual_backup)

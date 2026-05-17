@@ -160,6 +160,7 @@ class WpsFormatHandler(FormatHandler):
                 raise OSError(f"备份文件失败：{e}")
         
         word = None
+        doc = None
         try:
             word = self._get_word_app()
             word.Visible = False
@@ -169,6 +170,7 @@ class WpsFormatHandler(FormatHandler):
             doc = word.Documents.Open(os.path.abspath(input_path))
             doc.SaveAs2(os.path.abspath(temp_docx), FileFormat=WD_FORMAT_DOCX)
             doc.Close()
+            doc = None  # 标记已关闭
             
             # 使用DOCX处理器格式化
             docx_handler = DocxFormatHandler()
@@ -178,6 +180,7 @@ class WpsFormatHandler(FormatHandler):
             doc = word.Documents.Open(os.path.abspath(temp_docx))
             doc.SaveAs2(os.path.abspath(input_path), FileFormat=WD_FORMAT_WPS)
             doc.Close()
+            doc = None  # 标记已关闭
             
             logger.info(f"WPS格式化完成：{input_path}")
             
@@ -191,6 +194,19 @@ class WpsFormatHandler(FormatHandler):
                     logger.error(f"恢复备份失败：{actual_backup_path}")
             raise ValueError(f"WPS文档处理失败(COM)：{e}")
         finally:
+            # 确保文档关闭
+            if doc is not None:
+                try:
+                    doc.Close()
+                except:
+                    pass
+            # 关闭Word/WPS应用实例，防止资源泄漏
+            if word is not None:
+                try:
+                    word.Quit()
+                except:
+                    pass
+            # 清理临时文件
             if os.path.exists(temp_docx):
                 try:
                     os.remove(temp_docx)
