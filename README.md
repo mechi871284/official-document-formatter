@@ -117,32 +117,41 @@ is_valid, message, handler = router.validate_file('文档.docx')
 
 ```
 公文格式化工具/
+├── assets/                       # 资源文件目录
+│   └── icons/                    # 应用图标
+│       ├── 公文格式化工具图标设计.ico
+│       └── 公文格式化工具图标设计.png
+├── config/                       # 配置文件
+│   └── 公文格式化工具.spec       # PyInstaller打包配置
+├── docs/                         # 文档目录
+│   ├── Linux跨平台使用说明.md
+│   └── 目录结构说明.md
+├── scripts/                      # 工具脚本
+│   └── convert_icon.py           # 图标转换脚本
 ├── src/                          # 源代码目录
 │   ├── __init__.py
-│   ├── main.py                   # 主程序入口
+│   ├── main.py                   # 主程序入口（Windows）
+│   ├── cross_platform_main.py     # 跨平台主程序入口
 │   └── formatters/               # 格式处理器模块
 │       ├── __init__.py
 │       ├── base_handler.py       # 处理器基类
 │       ├── docx_handler.py       # DOCX处理器
 │       ├── doc_handler.py        # DOC处理器
 │       ├── wps_handler.py        # WPS处理器
-│       ── router.py             # 格式路由器
+│       ├── router.py             # 格式路由器
+│       ├── robustness.py         # 健壮性处理
+│       └── cross_platform.py     # 跨平台支持
 ├── tests/                        # 测试目录
 │   ├── __init__.py
 │   ├── test_main.py              # 主程序测试
-│   └── test_formatters.py        # 格式处理器测试
-── assets/                       # 资源文件目录
-│   └── icons/                    # 图标文件
-├── scripts/                      # 工具脚本
-│   └── convert_icon.py           # 图标转换脚本
-├── config/                       # 配置文件
-│   └── 公文格式化工具.spec       # PyInstaller配置
-├── docs/                         # 文档目录
-│   └── 目录结构说明.md
+│   ├── test_formatters.py        # 格式处理器测试
+│   ├── test_robustness.py        # 健壮性测试
+│   └── linux_native_test.py      # Linux原生测试
 ├── .gitignore                    # Git忽略配置
 ├── README.md                     # 项目说明
-── requirements.txt              # 依赖列表
-└── 公文格式化工具.exe            # 可执行文件
+├── requirements.txt              # 依赖列表
+├── run.bat                       # Windows启动脚本
+└── run.sh                        # Linux/macOS启动脚本
 ```
 
 ## 打包部署
